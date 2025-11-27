@@ -31,6 +31,6 @@ func (mockStudentRepository *MockStudentRepository) GetAll() ([]model.Student, e
 }
 
 func (mockStudentRepository *MockStudentRepository) SaveAll(students []model.Student) error {
-	args := mockStudentRepository.Called()
+	args := mockStudentRepository.Called(students)
 	return args.Error(0)
 }
