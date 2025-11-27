@@ -1,0 +1,466 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>handler: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">session-9/handler/user.go (0.0%)</option>
+				
+				<option value="file1">session-9/main.go (0.0%)</option>
+				
+				<option value="file2">session-9/repository/student.go (0.0%)</option>
+				
+				<option value="file3">session-9/repository/student_mock.go (0.0%)</option>
+				
+				<option value="file4">session-9/service/student.go (18.0%)</option>
+				
+				<option value="file5">session-9/utils/file.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package handler
+
+import (
+        "fmt"
+        "session-9/model"
+        "strings"
+)
+
+// StudentService interface used by CLI handler
+type StudentService interface {
+        GetAll() ([]model.Student, error)
+        GetByID(id int) (*model.Student, error)
+        Create(student model.Student) (model.Student, error)
+        Update(id int, student model.Student) (model.Student, error)
+        Delete(id int) error
+}
+
+type StudentHandler struct {
+        Svc StudentService
+}
+
+func NewStudentHandler(svc StudentService) *StudentHandler <span class="cov0" title="0">{
+        return &amp;StudentHandler{Svc: svc}
+}</span>
+
+// ListStudents returns formatted list of students
+func (h *StudentHandler) ListStudents() (string, error) <span class="cov0" title="0">{
+        students, err := h.Svc.GetAll()
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">if len(students) == 0 </span><span class="cov0" title="0">{
+                return "No students found.\n", nil
+        }</span>
+
+        <span class="cov0" title="0">var b strings.Builder
+        b.WriteString("Students:\n")
+        for _, st := range students </span><span class="cov0" title="0">{
+                // format: ID - Name (Age)
+                fmt.Fprintf(&amp;b, "- %d: %s (%d)\n", st.ID, st.Name, st.Age)
+        }</span>
+        <span class="cov0" title="0">return b.String(), nil</span>
+}
+
+// CreateStudent handles creating a new student and returns message
+func (h *StudentHandler) CreateStudent(name string, age int) (string, error) <span class="cov0" title="0">{
+        input := model.Student{
+                Name: name,
+                Age:  age,
+        }
+
+        created, err := h.Svc.Create(input)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return fmt.Sprintf("Student created: ID=%d, Name=%s, Age=%d\n",
+                created.ID, created.Name, created.Age), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "fmt"
+        "session-9/handler"
+        "session-9/repository"
+        "session-9/service"
+)
+
+func main() <span class="cov0" title="0">{
+        repo := repository.NewStudentRepository("data/student.json")
+        svc := service.NewStudentService(repo)
+        h := handler.NewStudentHandler(svc)
+
+        for </span><span class="cov0" title="0">{
+                fmt.Println("=== Student CLI ===")
+                fmt.Println("1. List students")
+                fmt.Println("2. Create student")
+                fmt.Println("0. Exit")
+                fmt.Print("Choose menu: ")
+
+                var choice string
+                fmt.Scanln(&amp;choice)
+
+                switch choice </span>{
+                case "1":<span class="cov0" title="0">
+                        out, err := h.ListStudents()
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Println("Error:", err)
+                                continue</span>
+                        }
+                        <span class="cov0" title="0">fmt.Println(out)</span>
+
+                case "2":<span class="cov0" title="0">
+                        var name string
+                        var age int
+
+                        fmt.Print("Name: ")
+                        fmt.Scanln(&amp;name)
+
+                        fmt.Print("Age: ")
+                        fmt.Scanln(&amp;age)
+
+                        out, err := h.CreateStudent(name, age)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Println("Error:", err)
+                                continue</span>
+                        }
+                        <span class="cov0" title="0">fmt.Println(out)</span>
+
+                case "0":<span class="cov0" title="0">
+                        fmt.Println("Bye!")
+                        return</span>
+
+                default:<span class="cov0" title="0">
+                        fmt.Println("Invalid choice")</span>
+                }
+
+                <span class="cov0" title="0">fmt.Println()</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package repository
+
+import (
+        "session-9/model"
+        "session-9/utils"
+)
+
+type StudentRepositoryInterface interface {
+        GetAll() ([]model.Student, error)
+        SaveAll([]model.Student) error
+}
+
+type StudentRepository struct {
+        FilePath string
+}
+
+func NewStudentRepository(path string) *StudentRepository <span class="cov0" title="0">{
+        return &amp;StudentRepository{FilePath: path}
+}</span>
+
+func (r *StudentRepository) GetAll() ([]model.Student, error) <span class="cov0" title="0">{
+        var students []model.Student
+        if err := utils.ReadJSON(r.FilePath, &amp;students); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return students, nil</span>
+}
+
+func (r *StudentRepository) SaveAll(students []model.Student) error <span class="cov0" title="0">{
+        return utils.WriteJSON(r.FilePath, students)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package repository
+
+import (
+        "session-9/model"
+
+        "github.com/stretchr/testify/mock"
+)
+
+// type MockStudentRepository struct {
+//         Students []model.Student
+//         ErrGet   error
+//         ErrSave  error
+// }
+
+// func (mockStudentRepository *MockStudentRepository) GetAll() ([]model.Student, error) {
+//         return mockStudentRepository.Students, mockStudentRepository.ErrGet
+// }
+
+// func (mockStudentRepository *MockStudentRepository) SaveAll(students []model.Student) error {
+//         mockStudentRepository.Students = students
+//         return mockStudentRepository.ErrSave
+// }
+
+type MockStudentRepository struct {
+        mock.Mock
+}
+
+func (mockStudentRepository *MockStudentRepository) GetAll() ([]model.Student, error) <span class="cov0" title="0">{
+        args := mockStudentRepository.Called()
+        return args.Get(0).([]model.Student), args.Error(1)
+}</span>
+
+func (mockStudentRepository *MockStudentRepository) SaveAll(students []model.Student) error <span class="cov0" title="0">{
+        args := mockStudentRepository.Called()
+        return args.Error(0)
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package service
+
+import (
+        "session-9/model"
+        "session-9/repository"
+        "session-9/utils"
+)
+
+// StudentService interface used by CLI handler
+type StudentServiceInterface interface {
+        GetAll() ([]model.Student, error)
+        GetByID(id int) (*model.Student, error)
+        Create(student model.Student) (model.Student, error)
+        Update(id int, student model.Student) (model.Student, error)
+        Delete(id int) error
+}
+
+type StudentService struct {
+        repo repository.StudentRepositoryInterface
+}
+
+func NewStudentService(repo repository.StudentRepositoryInterface) *StudentService <span class="cov8" title="1">{
+        return &amp;StudentService{repo: repo}
+}</span>
+
+// GetAll returns all students
+func (s *StudentService) GetAll() ([]model.Student, error) <span class="cov0" title="0">{
+        return s.repo.GetAll()
+}</span>
+
+// GetByID returns a student by id
+func (s *StudentService) GetByID(id int) (*model.Student, error) <span class="cov8" title="1">{
+        students, err := s.repo.GetAll()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for _, st := range students </span><span class="cov8" title="1">{
+                if st.ID == id </span><span class="cov8" title="1">{
+                        copy := st
+                        return &amp;copy, nil
+                }</span>
+        }
+        <span class="cov8" title="1">return nil, utils.ErrNotFound</span>
+}
+
+// Create creates new student with auto-increment ID
+func (s *StudentService) Create(input model.Student) (model.Student, error) <span class="cov0" title="0">{
+        students, err := s.repo.GetAll()
+        if err != nil </span><span class="cov0" title="0">{
+                return model.Student{}, err
+        }</span>
+
+        <span class="cov0" title="0">maxID := 0
+        for _, st := range students </span><span class="cov0" title="0">{
+                if st.ID &gt; maxID </span><span class="cov0" title="0">{
+                        maxID = st.ID
+                }</span>
+        }
+        <span class="cov0" title="0">input.ID = maxID + 1
+
+        students = append(students, input)
+
+        if err := s.repo.SaveAll(students); err != nil </span><span class="cov0" title="0">{
+                return model.Student{}, err
+        }</span>
+
+        <span class="cov0" title="0">return input, nil</span>
+}
+
+// Update updates existing student by id
+func (s *StudentService) Update(id int, input model.Student) (model.Student, error) <span class="cov0" title="0">{
+        students, err := s.repo.GetAll()
+        if err != nil </span><span class="cov0" title="0">{
+                return model.Student{}, err
+        }</span>
+
+        <span class="cov0" title="0">updated := false
+        for i, st := range students </span><span class="cov0" title="0">{
+                if st.ID == id </span><span class="cov0" title="0">{
+                        input.ID = id
+                        students[i] = input
+                        updated = true
+                        break</span>
+                }
+        }
+
+        <span class="cov0" title="0">if !updated </span><span class="cov0" title="0">{
+                return model.Student{}, utils.ErrNotFound
+        }</span>
+
+        <span class="cov0" title="0">if err := s.repo.SaveAll(students); err != nil </span><span class="cov0" title="0">{
+                return model.Student{}, err
+        }</span>
+
+        <span class="cov0" title="0">return input, nil</span>
+}
+
+// Delete deletes student by id
+func (s *StudentService) Delete(id int) error <span class="cov0" title="0">{
+        students, err := s.repo.GetAll()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">newList := make([]model.Student, 0, len(students))
+        found := false
+        for _, st := range students </span><span class="cov0" title="0">{
+                if st.ID == id </span><span class="cov0" title="0">{
+                        found = true
+                        continue</span>
+                }
+                <span class="cov0" title="0">newList = append(newList, st)</span>
+        }
+
+        <span class="cov0" title="0">if !found </span><span class="cov0" title="0">{
+                return utils.ErrNotFound
+        }</span>
+
+        <span class="cov0" title="0">return s.repo.SaveAll(newList)</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package utils
+
+import (
+        "encoding/json"
+        "os"
+)
+
+// ReadJSON reads JSON file into v
+func ReadJSON(path string, v interface{}) error <span class="cov0" title="0">{
+        file, err := os.Open(path)
+        if err != nil </span><span class="cov0" title="0">{
+                // if file does not exist, treat as empty data
+                if os.IsNotExist(err) </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov0" title="0">defer file.Close()
+
+        return json.NewDecoder(file).Decode(v)</span>
+}
+
+// WriteJSON writes v into JSON file
+func WriteJSON(path string, v interface{}) error <span class="cov0" title="0">{
+        file, err := os.Create(path)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer file.Close()
+
+        enc := json.NewEncoder(file)
+        enc.SetIndent("", "  ")
+        return enc.Encode(v)</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
