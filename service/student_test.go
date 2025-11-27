@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func newTestService() (*StudentService, *repository.MockStudentRepository) {
@@ -164,12 +163,15 @@ func TestStudentService_Create_Error_GetAll(t *testing.T) {
 func TestStudentService_Create_Error_SaveAll(t *testing.T) {
 	svc, repo := newTestService()
 
-	existing := []model.Student{{Name: "Andi", Age: 10}}
+	existing := []model.Student{{ID: 1, Name: "Andi", Age: 10}}
 	input := model.Student{Name: "Bayu", Age: 25}
+	expected := []model.Student{
+		{ID: 1, Name: "Andi", Age: 10},
+		{ID: 2, Name: "Bayu", Age: 25},
+	}
+	repo.On("GetAll").Return(existing, nil).Once() //GetAll Success
 
-	repo.On("GetAll").Return(existing, nil).Once()
-
-	repo.On("SaveAll", mock.Anything).Return(utils.ErrFile)
+	repo.On("SaveAll", expected).Return(utils.ErrFile)
 
 	result, err := svc.Create(input)
 
