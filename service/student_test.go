@@ -5,6 +5,8 @@ import (
 	"session-9/repository"
 	"session-9/utils"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // func newTestService(initial []model.Student) (*StudentService, *repository.MockStudentRepository) {
@@ -138,17 +140,33 @@ func TestStudentService_GetByID_NotFound(t *testing.T) {
 		{ID: 2, Name: "Siti", Age: 22},
 	}
 	svc, repo := newTestService()
-	repo.On("GetAll").Return(initial, nil).Once()
+	repo.On("GetAll").Return(initial, utils.ErrFile).Once()
 
 	_, err := svc.GetByID(999)
-	if err == nil {
-		t.Fatalf("expected error, got nil")
-	}
 
-	if err != utils.ErrNotFound {
-		t.Fatalf("expected ErrNotFound, got %v", err)
-	}
+	assert.Error(t, err)
+	assert.Equal(t, utils.ErrNotFound, err)
+
+	repo.AssertExpectations(t)
 }
+
+// func TestStudentService_GetByID_NotFound(t *testing.T) {
+// 	initial := []model.Student{
+// 		{ID: 1, Name: "Andi", Age: 21},
+// 		{ID: 2, Name: "Siti", Age: 22},
+// 	}
+// 	svc, repo := newTestService()
+// 	repo.On("GetAll").Return(initial, utils.ErrFile).Once()
+
+// 	_, err := svc.GetByID(999)
+// 	if err == nil {
+// 		t.Fatalf("expected error, got nil")
+// 	}
+
+// 	if err != utils.ErrNotFound {
+// 		t.Fatalf("expected ErrNotFound, got %v", err)
+// 	}
+// }
 
 func TestStudentService_GetByID_FileError(t *testing.T) {
 	svc, repo := newTestService()
